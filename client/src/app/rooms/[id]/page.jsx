@@ -1,23 +1,25 @@
 'use client'
 import { useEffect, useState  } from 'react'
 import io from 'socket.io-client'
+import { useConnection } from '@/providers/SocketProvider'
 export default function Room({ params }) {
     const { id } = params 
-    const [socket, setSocket] = useState(null)
-    const [isConnected, setIsConnected] = useState(false)
+    const { socket, isConnected, dispatch } = useConnection()
+    // const [socket, setSocket] = useState(null)
+    // const [isConnected, setIsConnected] = useState(false)
     useEffect(() => {
         const newSocket = io.connect(`http://localhost:4000/rooms/${id}`, {
             path: `/socket.io/`
         })
         newSocket.on('connect', () => {
-            setIsConnected(true)
+            dispatch({type: 'SOCKET_CONNECT', payload: newSocket})
             console.log('connected')
         })
         newSocket.on('disconnect', () => {
-            setIsConnected(false)
+            dispatch({type: 'SOCKET_DISCONNECT'})
             console.log("disconnected")
         })
-        setSocket(newSocket)
+        
 
         return () => {
             if (socket) socket.disconnect()
